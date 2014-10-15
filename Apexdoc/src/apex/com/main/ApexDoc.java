@@ -1,26 +1,38 @@
 package apex.com.main;
 import java.io.BufferedReader;
 import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 //import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+
+
+
+
 //import java.util.regex.Pattern;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.operation.*;
+import org.json.simple.JSONObject;
+import org.json.simple.JSONArray;
 
 public class ApexDoc implements IRunnableWithProgress {
 
 	public static FileManager fm;
 	public static String[] rgstrScope;
 	public static String[] rgstrArgs;
-	
+	public static JSONObject jsonOutput;
+	public static JSONArray jsonClasses;
 	public ApexDoc(){
 		try{
+
 			File file = new File("apex_doc_log.txt");
 			FileOutputStream fos = new FileOutputStream(file);
 			PrintStream ps = new PrintStream(fos);
@@ -31,14 +43,82 @@ public class ApexDoc implements IRunnableWithProgress {
 
 	// public entry point when called from the command line.
 	public static void main(String[] args) {
+		jsonOutput = new JSONObject();
+		jsonClasses = new JSONArray();
 		try {
 			RunApexDoc(args, null);
+			jsonOutput.put("classes", jsonClasses);
+			generateJSONPage();
 		} catch(Exception ex) {
 			ex.printStackTrace();
 			System.out.println(ex.getMessage());
 			printHelp();
 			System.exit(-1);
 		}
+	}
+	
+	private static void generateJSONPage(){
+		System.out.println(jsonOutput.toJSONString());
+		String path = "";
+		FileOutputStream fos; 
+	    DataOutputStream dos;
+		if(path.endsWith("/") || path.endsWith("\\")){
+			path += Constants.ROOT_DIRECOTRY; // + "/" + fileName + ".html";
+		}else{
+			path += "/"  + Constants.ROOT_DIRECOTRY; // + "/" + fileName + ".html";
+		}
+		
+		(new File(path)).mkdirs();
+		
+		String fileName = '.' + path + "/data.js";
+		copyFile("render.js", "." + path);
+		copyFile("index.html", "." + path);
+		copyFile("style.css", "." + path);
+		copyFile("jquery-latest.js", "." + path);
+		File file = new File(fileName);
+		try {
+			fos = new FileOutputStream(file);
+			dos=new DataOutputStream(fos);
+			dos.writeBytes("var javadoc = " + jsonOutput.toJSONString() + ";");
+			//dos.writeBytes(jsonOutput.toJSONString());
+			dos.close();
+			fos.close();
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			System.out.println(e.getMessage());
+		} catch (IOException e) {
+			e.printStackTrace();
+			System.out.println(e.getMessage());
+		}
+	}
+	
+	private static void copyFile(String source, String target){
+		InputStream is = ApexDoc.class.getResourceAsStream(source);
+		//InputStreamReader isr = new InputStreamReader(is);
+		//BufferedReader reader = new BufferedReader(isr);
+		FileOutputStream to;
+		try{
+			to = new FileOutputStream(target + "/" + source);
+		}catch(Exception e){
+			System.out.println(e.getMessage());
+			to = null;
+		}
+		
+	   
+		byte[] buffer = new byte[4096];
+	    int bytesRead;
+	    try{
+		    while ((bytesRead = is.read(buffer)) != -1){
+		    	to.write(buffer, 0, bytesRead); // write
+			}
+		    
+		    to.flush();
+		    to.close();
+		    is.close();
+	    }catch(IOException ex){
+	    	System.out.println(ex.getMessage());
+	    }
 	}
 	
 	
@@ -78,11 +158,12 @@ public class ApexDoc implements IRunnableWithProgress {
 		}
 		
 		// default scope to global and public if not specified
-		if (rgstrScope == null || rgstrScope.length == 0) {
-			rgstrScope = new String[2];
+		//if (rgstrScope == null || rgstrScope.length == 0) {
+			rgstrScope = new String[3];
 			rgstrScope[0] = "global";
 			rgstrScope[1] = "public";
-		}
+			rgstrScope[2] = "private";
+		//}
 				
 		// find all the files to parse
 		fm = new FileManager(targetDirectory);
@@ -114,7 +195,7 @@ public class ApexDoc implements IRunnableWithProgress {
 		if (monitor != null) monitor.worked(1);
 		
 		// create our set of HTML files
-		fm.createDoc(cModels, projectDetail, homeContents, monitor);
+		//fm.createDoc(cModels, projectDetail, homeContents, monitor);
 		if (monitor != null) monitor.done();
 		
 		// we are done!
@@ -416,6 +497,7 @@ public class ApexDoc implements IRunnableWithProgress {
 	
 	
 	private static void debug(ClassModel cModel){
+		JSONObject classDescription = new JSONObject();
 		try{
 			System.out.println("Class::::::::::::::::::::::::");
 			if(cModel.getClassName() != null) System.out.println(cModel.getClassName());			
@@ -423,25 +505,63 @@ public class ApexDoc implements IRunnableWithProgress {
 			System.out.println(cModel.getAuthor());
 			System.out.println(cModel.getDescription());
 			System.out.println(cModel.getDate());
-			
-			System.out.println("Properties::::::::::::::::::::::::");
-			for (PropertyModel property : cModel.getProperties()) {
-				System.out.println(property.getNameLine());
-				System.out.println(property.getDescription());
-			}
-			
-			System.out.println("Methods::::::::::::::::::::::::");
-			for (MethodModel method : cModel.getMethods()) {
-				System.out.println(method.getMethodName());
-				System.out.println(method.getAuthor());
-				System.out.println(method.getDescription());
-				System.out.println(method.getDate());
-				for (String param : method.getParams()) {
-					System.out.println(param);
+			if(cModel.getClassName() != null && cModel.getClassName() != ""){
+				classDescription.put("name", cModel.getClassName());
+				classDescription.put("className", cModel.getClassName());
+				classDescription.put("author", cModel.getAuthor());
+				classDescription.put("description", cModel.getDescription());
+				classDescription.put("date", cModel.getDate());
+				
+				System.out.println("Properties::::::::::::::::::::::::");
+				JSONArray properties = new JSONArray();
+				for (PropertyModel property : cModel.getProperties()) {
+					JSONObject prop = new JSONObject();
+					prop.put("name", property.getNameLine());
+					prop.put("description", property.getDescription());
+					System.out.println(property.getNameLine());
+					System.out.println(property.getDescription());
+					properties.add(prop);
 				}
 				
+				classDescription.put("properties", properties);
+				System.out.println("Methods::::::::::::::::::::::::");
+				JSONArray methods = new JSONArray();
+				JSONArray constructors = new JSONArray();
+				for (MethodModel method : cModel.getMethods()) {
+
+					JSONObject methodDescription = new JSONObject();
+					System.out.println(method.getMethodName());
+					System.out.println(method.getAuthor());
+					System.out.println(method.getDescription());
+					System.out.println(method.getDate());
+					methodDescription.put("name", method.getNameLine());
+					methodDescription.put("author", method.getAuthor());
+					methodDescription.put("description", method.getDescription());
+					methodDescription.put("date", method.getDate());
+					
+					JSONArray params = new JSONArray();
+					for (String param : method.getParams()) {
+						String[] pValues = param.split("\\s+", 2);
+						JSONObject pObj = new JSONObject();
+						pObj.put("name", pValues[0]);
+						pObj.put("description", "");
+						if(pValues.length > 1){
+							pObj.put("description", pValues[1]);
+						}
+						params.add(pObj);
+					}
+					methodDescription.put("params", params);
+					if(method.getMethodName().compareToIgnoreCase(cModel.getClassName()) == 0){
+						constructors.add(methodDescription);
+					}else{
+						methods.add(methodDescription);
+					}
+				}
+				classDescription.put("methods", methods);
+				classDescription.put("constructors", constructors);
+				System.out.println(classDescription.toJSONString());
+				jsonClasses.add(classDescription);
 			}
-			
 		}catch (Exception e){
 			e.printStackTrace();
 		}

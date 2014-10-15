@@ -1,5 +1,6 @@
 package apex.com.main;
 import java.util.ArrayList;
+import java.util.Collections;
 
 
 public class ClassModel extends ApexModel {
@@ -21,6 +22,9 @@ public class ClassModel extends ApexModel {
 	}
 
 	public ArrayList<MethodModel> getMethods() {
+		if(methods != null){
+			Collections.sort(methods);
+		}
 		return methods;
 	}
 

@@ -2,7 +2,7 @@ package apex.com.main;
 import java.util.ArrayList;
 
 
-public class MethodModel extends ApexModel {
+public class MethodModel extends ApexModel implements Comparable<MethodModel> {
 	
 	public MethodModel(){
 		params = new ArrayList<String>();
@@ -43,6 +43,14 @@ public class MethodModel extends ApexModel {
 		return "";
 	}
 
+	@Override
+	public int compareTo(MethodModel method){
+		try{
+			return this.getMethodName().compareToIgnoreCase(method.getMethodName());
+		}catch(NullPointerException ex){
+			return 0;
+		}
+	}
 	private ArrayList<String> params;
 	private String returnType;
 }

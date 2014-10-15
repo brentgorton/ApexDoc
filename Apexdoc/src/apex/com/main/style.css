@@ -1,0 +1,73 @@
+body{
+  /*background: #666;*/
+  font-family: Arial;
+  color: #333;
+}
+.class{
+  background: white;
+  /*border: 1px solid rgba(0,0,0,0.4);*/
+  margin-bottom: 10px;
+  padding: 10px;
+}
+
+.class > .name{
+  font-weight: bold;
+  font-size: 14px;
+  color: #054E9A;
+}
+
+.class > .author{
+  font-size: 11px;
+  color: #054E9A;
+  margin-bottom: 5px;
+  display: none;
+}
+
+.class > .description{
+  font-size: 12px;
+  padding: 5px 0px;
+}
+
+.methods{
+  /*background: #f1f1f1;*/
+  padding: 5px;
+  margin-left: 30px;
+}
+
+.method {
+
+  border-bottom: 1px solid rgba(0,0,0,0.05);
+  padding-bottom: 5px;
+  margin-bottom: 5px;
+  font-size: 11px;
+}
+
+
+
+.method > .name{
+  font-weight: bold;
+  font-size: 11px;
+}
+
+.method > .name > .author{
+  float: right;
+  font-weight: normal;
+  color: #999;
+  font-style: italic;
+  display: none;
+}
+
+.params{
+  /*background: #eee;*/
+  margin-left: 30px;
+}
+
+.params > .param > * {
+  padding: 3px 5px;
+}
+.params > .param > .name{
+  display: inline-block;
+  width: 150px;
+  font-weight: bold;
+  color: #054E9A;
+}
