@@ -368,14 +368,7 @@ public class ApexDoc implements IRunnableWithProgress {
 		boolean inDescription = false;
 		for (String comment : lstComments) {
 			comment = comment.trim();
-			int idxStart = comment.toLowerCase().indexOf("* @description");
-			if(idxStart != -1){
-				mModel.setDescription(comment.substring(idxStart + 15).trim());
-				inDescription = true;
-				continue;
-			}
-			
-			idxStart = comment.toLowerCase().indexOf("* @author");
+			int idxStart = comment.toLowerCase().indexOf("* @author");
 			if(idxStart != -1){
 				mModel.setAuthor(comment.substring(idxStart + 10).trim());
 				inDescription = false;
@@ -402,7 +395,16 @@ public class ApexDoc implements IRunnableWithProgress {
 				inDescription = false;
 				continue;
 			}
-
+			
+			idxStart = comment.toLowerCase().indexOf("* @description");
+			if(idxStart != -1){
+				mModel.setDescription(comment.substring(idxStart + 15).trim());
+				inDescription = true;
+				continue;
+			}
+			if(inDescription == false){
+				inDescription = (comment.toLowerCase().indexOf("* ") >= 0 && comment.toLowerCase().indexOf("* @") < 0);
+			}
 			// handle multiple lines for description.
 			if (inDescription) {
 				int i;
