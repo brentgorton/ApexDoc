@@ -370,6 +370,9 @@ public class ApexDoc implements IRunnableWithProgress {
 	
 	
 	private static void debug(ClassModel cModel){
+		//System.out.println(cModel.toJSON().toJSONString());
+		jsonClasses.add(cModel.toJSON());
+		/*
 		JSONObject classDescription = new JSONObject();
 		try{
 			System.out.println("Class::::::::::::::::::::::::");
@@ -438,6 +441,7 @@ public class ApexDoc implements IRunnableWithProgress {
 		}catch (Exception e){
 			e.printStackTrace();
 		}
+		*/
 	}
 
 }

@@ -2,6 +2,9 @@ package apex.com.main;
 import java.util.ArrayList;
 import java.util.Collections;
 
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+
 
 public class ClassModel extends ApexModel {
 	
@@ -58,6 +61,24 @@ public class ClassModel extends ApexModel {
 			return "";
 		}
 		
+	}
+	
+	public JSONObject toJSON(){
+		JSONObject obj = super.toJSON();
+		obj.put("name", this.getClassName());
+		JSONArray mArray = new JSONArray();
+		JSONArray constructors = new JSONArray();
+		for(MethodModel m : this.getMethods()){
+			if(m.getIsConstructor()){
+				constructors.add(m.toJSON());
+			}else{
+				mArray.add(m.toJSON());
+			}
+		}
+		obj.put("methods", mArray);
+		obj.put("constructors", constructors);
+		return obj;
+		//return null;
 	}
 	
 }

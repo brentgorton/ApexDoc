@@ -2,9 +2,12 @@ package apex.com.main;
 
 import java.util.ArrayList;
 
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+
 
 public class MethodModel extends ApexModel implements Comparable<MethodModel> {
-	
+	private boolean isConstructor;
 	public MethodModel(){
 		super();
 		//params = new ArrayList<String>();
@@ -12,6 +15,7 @@ public class MethodModel extends ApexModel implements Comparable<MethodModel> {
 	
 	public MethodModel(String name, ArrayList<String> comments){
 		this();
+		this.isConstructor = false;
 		this.setNameLine(name);
 		this.parseComments(comments);
 	}
@@ -24,6 +28,17 @@ public class MethodModel extends ApexModel implements Comparable<MethodModel> {
 				nameLine = nameLine.substring(0, i+1);
 		}
 		super.setNameLine(nameLine);
+		String constructorNameLine = getNameLine().toLowerCase().replace("public", "").trim();
+		this.isConstructor = false;
+		if(constructorNameLine != null && constructorNameLine.length() > 0 ){
+			int lastindex = constructorNameLine.indexOf("(");
+			if(lastindex > 0){
+				String methodName = constructorNameLine.substring(0,lastindex);
+				if(!methodName.contains(" ")){
+					this.isConstructor = true;
+				}
+			}
+		}
 	}
 	/*
 	public ArrayList<String> getParams() {
@@ -51,6 +66,10 @@ public class MethodModel extends ApexModel implements Comparable<MethodModel> {
 		}
 		return "";
 	}
+	
+	public boolean getIsConstructor(){
+		return this.isConstructor;
+	}
 
 	@Override
 	public int compareTo(MethodModel method){
@@ -60,6 +79,13 @@ public class MethodModel extends ApexModel implements Comparable<MethodModel> {
 			return 0;
 		}
 	}
+	/*
+	public JSONObject toJSON(){
+		JSONObject obj = super.toJSON();
+		obj.put("params", new JSONArray());
+		return obj;
+	}
+	*/
 	//private ArrayList<String> params;
 	private String returnType;
 }

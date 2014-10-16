@@ -2,6 +2,9 @@ package apex.com.main;
 
 import java.util.ArrayList;
 
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+
 public class ApexModel {
 	public ApexModel(){
 		params = new ArrayList<String>();
@@ -108,4 +111,28 @@ public class ApexModel {
 	private String returns;
 	private ArrayList<String> params;
 	private String returnType;
+	
+	public JSONObject toJSON(){
+		JSONObject apexDescription = new JSONObject();
+		apexDescription.put("name", this.getNameLine());
+		apexDescription.put("className", this.getNameLine());
+		apexDescription.put("author", this.getAuthor());
+		apexDescription.put("description", this.getDescription());
+		apexDescription.put("date", this.getDate());
+		if(this instanceof MethodModel){
+			JSONArray pArray = new JSONArray();
+			for(String param : params){
+				String[] pValues = param.split("\\s+", 2);
+				JSONObject pObj = new JSONObject();
+				pObj.put("name", pValues[0]);
+				pObj.put("description", "");
+				if(pValues.length > 1){
+					pObj.put("description", pValues[1]);
+				}
+				pArray.add(pObj);
+			}
+			apexDescription.put("params", pArray);
+		}
+		return apexDescription;
+	}
 }
