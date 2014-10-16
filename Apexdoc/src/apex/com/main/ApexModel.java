@@ -1,6 +1,68 @@
 package apex.com.main;
 
+import java.util.ArrayList;
+
 public class ApexModel {
+	public ApexModel(){
+		params = new ArrayList<String>();
+	}
+	public void parseComments(ArrayList<String> lstComments){
+		boolean inDescription = false;
+		for (String comment : lstComments) {
+			comment = comment.trim();
+			int idxStart = comment.toLowerCase().indexOf("* @author");
+			if(idxStart != -1){
+				this.setAuthor(comment.substring(idxStart + 10).trim());
+				inDescription = false;
+				continue;
+			}
+			
+			idxStart = comment.toLowerCase().indexOf("* @date");
+			if(idxStart != -1){
+				this.setDate(comment.substring(idxStart + 7).trim());
+				inDescription = false;
+				continue;
+			}
+			
+			idxStart = comment.toLowerCase().indexOf("* @return");
+			if(idxStart != -1){
+				this.setReturns(comment.substring(idxStart + 10).trim());
+				inDescription = false;
+				continue;
+			}
+			
+			idxStart = comment.toLowerCase().indexOf("* @param");
+			if(idxStart != -1){
+				this.getParams().add(comment.substring(idxStart + 8).trim());
+				inDescription = false;
+				continue;
+			}
+			
+			idxStart = comment.toLowerCase().indexOf("* @description");
+			if(idxStart != -1){
+				this.setDescription(comment.substring(idxStart + 15).trim());
+				inDescription = true;
+				continue;
+			}
+			if(inDescription == false){
+				inDescription = (comment.toLowerCase().indexOf("* ") >= 0 && comment.toLowerCase().indexOf("* @") < 0);
+			}
+			// handle multiple lines for description.
+			if (inDescription) {
+				int i;
+				for (i = 0; i < comment.length(); i++) {
+					char ch = comment.charAt(i);
+					if (ch != '*' && ch != ' ')
+						break;				
+				}
+				if (i < comment.length()) {
+					this.setDescription(this.getDescription() + ' ' + comment.substring(i));
+				}
+				continue;
+			}
+			//System.out.println("#### ::" + comment);
+		}
+	}
 	public String getNameLine() {
 		return nameLine;
 	}
@@ -31,11 +93,19 @@ public class ApexModel {
 	public void setReturns(String returns) {
 		this.returns = returns;
 	}
+
+	public ArrayList<String> getParams() {
+		return params;
+	}
+	public void setParams(ArrayList<String> params) {
+		this.params = params;
+	}
 	
 	private String nameLine;
 	private String description;
 	private String author;
 	private String date;
 	private String returns;
-	
+	private ArrayList<String> params;
+	private String returnType;
 }

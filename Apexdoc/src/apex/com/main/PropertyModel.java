@@ -1,9 +1,19 @@
 package apex.com.main;
 
+import java.util.ArrayList;
+
 public class PropertyModel extends ApexModel {
 
 	public PropertyModel() {
+		super();
 	}
+	
+	public PropertyModel(String name, ArrayList<String> comments){
+		this.setNameLine(name);
+		this.parseComments(comments);
+	}
+	
+	
 
 	public void setNameLine(String nameLine) {
 		if (nameLine != null) {

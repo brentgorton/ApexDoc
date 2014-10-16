@@ -1,11 +1,19 @@
 package apex.com.main;
+
 import java.util.ArrayList;
 
 
 public class MethodModel extends ApexModel implements Comparable<MethodModel> {
 	
 	public MethodModel(){
-		params = new ArrayList<String>();
+		super();
+		//params = new ArrayList<String>();
+	}
+	
+	public MethodModel(String name, ArrayList<String> comments){
+		this();
+		this.setNameLine(name);
+		this.parseComments(comments);
 	}
 	
 	public void setNameLine(String nameLine) {
@@ -17,13 +25,14 @@ public class MethodModel extends ApexModel implements Comparable<MethodModel> {
 		}
 		super.setNameLine(nameLine);
 	}
-	
+	/*
 	public ArrayList<String> getParams() {
 		return params;
 	}
 	public void setParams(ArrayList<String> params) {
 		this.params = params;
 	}
+	*/
 	public String getReturnType() {
 		return returnType;
 	}
@@ -51,6 +60,6 @@ public class MethodModel extends ApexModel implements Comparable<MethodModel> {
 			return 0;
 		}
 	}
-	private ArrayList<String> params;
+	//private ArrayList<String> params;
 	private String returnType;
 }

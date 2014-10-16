@@ -287,15 +287,16 @@ public class ApexDoc implements IRunnableWithProgress {
 		    	// look for a class
 		    	if (!classparsed && strLine.contains(" class ")) {
 	    			classparsed = true;
-	    			fillClassModel(cModel, strLine, lstComments);
+	    			//fillClassModel(cModel, strLine, lstComments);
+	    			cModel.populate(strLine, lstComments);
 	    			lstComments.clear();
 	    			continue;
 		    	}
 		    	
 		    	// look for a method
 		    	if (strLine.contains("(")) {
-		    		MethodModel mModel = new MethodModel();
-    				fillMethodModel(mModel, strLine, lstComments);
+		    		MethodModel mModel = new MethodModel(strLine, lstComments);
+    				//fillMethodModel(mModel, strLine, lstComments);
     				methods.add(mModel);
 	    			lstComments.clear();
 	    			continue;		    		
@@ -306,8 +307,8 @@ public class ApexDoc implements IRunnableWithProgress {
 		    		continue;
 		    	
 		    	// must be a property
-		    	PropertyModel propertyModel = new PropertyModel();
-		    	fillPropertyModel(propertyModel, strLine, lstComments);
+		    	PropertyModel propertyModel = new PropertyModel(strLine, lstComments);
+		    	//fillPropertyModel(propertyModel, strLine, lstComments);
 		    	properties.add(propertyModel);
 		    	lstComments.clear();
 		    	continue;
@@ -335,136 +336,6 @@ public class ApexDoc implements IRunnableWithProgress {
 		return false;
 	}
 	
-	private static void fillPropertyModel(PropertyModel propertyModel, String name, ArrayList<String> lstComments) {
-		propertyModel.setNameLine(name);
-		boolean inDescription = false;
-		for (String comment : lstComments) {
-			comment = comment.trim();
-			int idxStart = comment.toLowerCase().indexOf("* @description");
-			if (idxStart != -1) {
-				propertyModel.setDescription(comment.substring(idxStart + 15).trim());
-				inDescription = true;
-				continue;
-			}
-			
-			// handle multiple lines for description.
-			if (inDescription) {
-				int i;
-				for (i = 0; i < comment.length(); i++) {
-					char ch = comment.charAt(i);
-					if (ch != '*' && ch != ' ')
-						break;				
-				}
-				if (i < comment.length()) {
-					propertyModel.setDescription(propertyModel.getDescription() + ' ' + comment.substring(i));
-				}
-				continue;
-			}
-		}
-	}
-	
-	private static void fillMethodModel(MethodModel mModel, String name, ArrayList<String> lstComments){
-		mModel.setNameLine(name);
-		boolean inDescription = false;
-		for (String comment : lstComments) {
-			comment = comment.trim();
-			int idxStart = comment.toLowerCase().indexOf("* @author");
-			if(idxStart != -1){
-				mModel.setAuthor(comment.substring(idxStart + 10).trim());
-				inDescription = false;
-				continue;
-			}
-			
-			idxStart = comment.toLowerCase().indexOf("* @date");
-			if(idxStart != -1){
-				mModel.setDate(comment.substring(idxStart + 7).trim());
-				inDescription = false;
-				continue;
-			}
-			
-			idxStart = comment.toLowerCase().indexOf("* @return");
-			if(idxStart != -1){
-				mModel.setReturns(comment.substring(idxStart + 10).trim());
-				inDescription = false;
-				continue;
-			}
-			
-			idxStart = comment.toLowerCase().indexOf("* @param");
-			if(idxStart != -1){
-				mModel.getParams().add(comment.substring(idxStart + 8).trim());
-				inDescription = false;
-				continue;
-			}
-			
-			idxStart = comment.toLowerCase().indexOf("* @description");
-			if(idxStart != -1){
-				mModel.setDescription(comment.substring(idxStart + 15).trim());
-				inDescription = true;
-				continue;
-			}
-			if(inDescription == false){
-				inDescription = (comment.toLowerCase().indexOf("* ") >= 0 && comment.toLowerCase().indexOf("* @") < 0);
-			}
-			// handle multiple lines for description.
-			if (inDescription) {
-				int i;
-				for (i = 0; i < comment.length(); i++) {
-					char ch = comment.charAt(i);
-					if (ch != '*' && ch != ' ')
-						break;				
-				}
-				if (i < comment.length()) {
-					mModel.setDescription(mModel.getDescription() + ' ' + comment.substring(i));
-				}
-				continue;
-			}
-			//System.out.println("#### ::" + comment);
-		}
-	}
-	private static void fillClassModel(ClassModel cModel, String name, ArrayList<String> lstComments){
-		//System.out.println("@@@@ " + name);
-		cModel.setNameLine(name);
-		boolean inDescription = false;
-		for (String comment : lstComments) {
-			comment = comment.trim();
-			int idxStart = comment.toLowerCase().indexOf("* @description");
-			if(idxStart != -1){
-				cModel.setDescription(comment.substring(idxStart + 15).trim());
-				inDescription = true;
-				continue;
-			}
-			
-			idxStart = comment.toLowerCase().indexOf("* @author");
-			if(idxStart != -1){
-				cModel.setAuthor(comment.substring(idxStart + 10).trim());
-				inDescription = false;
-				continue;
-			}
-			
-			idxStart = comment.toLowerCase().indexOf("* @date");
-			if(idxStart != -1){
-				cModel.setDate(comment.substring(idxStart + 7).trim());
-				inDescription = false;
-				continue;
-			}
-			
-			// handle multiple lines for description.
-			if (inDescription) {
-				int i;
-				for (i = 0; i < comment.length(); i++) {
-					char ch = comment.charAt(i);
-					if (ch != '*' && ch != ' ')
-						break;				
-				}
-				if (i < comment.length()) {
-					cModel.setDescription(cModel.getDescription() + ' ' + comment.substring(i));
-				}
-				continue;
-			}
-			//System.out.println("#### ::" + comment);
-		}
-	}
-
 	
 	/*************************************************************************
 	 * strPrevWord

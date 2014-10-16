@@ -6,8 +6,14 @@ import java.util.Collections;
 public class ClassModel extends ApexModel {
 	
 	public ClassModel(){
+		super();
 		methods = new ArrayList<MethodModel>();
 		properties = new ArrayList<PropertyModel>();
+	}
+	
+	public void populate(String name, ArrayList<String> comments){
+		this.setNameLine(name);
+		this.parseComments(comments);
 	}
 
 	private ArrayList<MethodModel> methods;
